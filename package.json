@@ -1,0 +1,23 @@
+{
+  "name": "group-pilot",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "concurrently -n gw,agent,server,web -c blue,magenta,green,cyan \"pnpm --filter @gp/mock-gateway dev\" \"pnpm --filter @gp/mock-agent dev\" \"pnpm --filter @gp/server dev\" \"pnpm --filter @gp/web dev\"",
+    "migrate": "pnpm --filter @gp/server migrate",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "concurrently": "^9.2.5",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}
