@@ -12,6 +12,7 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
+    "e2e": "pnpm --filter @gp/e2e e2e",
     "llm-agent": "pnpm --filter @gp/llm-agent start"
   },
   "devDependencies": {
