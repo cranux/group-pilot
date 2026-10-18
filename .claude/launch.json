@@ -1,0 +1,9 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "mock-gateway", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@gp/mock-gateway", "dev"], "port": 4001 },
+    { "name": "mock-agent", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@gp/mock-agent", "dev"], "port": 4002 },
+    { "name": "server", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@gp/server", "dev"], "port": 3000 },
+    { "name": "web", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@gp/web", "dev"], "port": 5173 }
+  ]
+}
