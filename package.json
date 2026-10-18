@@ -11,7 +11,8 @@
     "migrate": "pnpm --filter @gp/server migrate",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "llm-agent": "pnpm --filter @gp/llm-agent start"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

@@ -1,0 +1,16 @@
+{
+  "name": "@gp/llm-agent",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "fastify": "^5.12.7",
+    "zod": "^3.25.76"
+  }
+}
