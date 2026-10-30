@@ -1,8 +1,11 @@
 node_modules/
 dist/
 .env
-data/
-media/
+# 运行时目录（MEDIA_DIR / SPOOL_FILE 默认相对启动目录）；只忽略根目录和各 app 根下的，别误伤 src/media 这类源码目录
+/data/
+/media/
+apps/*/data/
+apps/*/media/
 coverage/
 playwright-report/
 test-results/
