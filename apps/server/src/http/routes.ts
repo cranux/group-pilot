@@ -58,8 +58,11 @@ export function registerErrorHandling(app: FastifyInstance): void {
 
 export function registerAuthHook(app: FastifyInstance, auth: AuthService): void {
   app.addHook('onRequest', async (req) => {
-    const url = req.url.split('?')[0];
-    if (!url.startsWith('/api/') || PUBLIC_ROUTES.has(url)) return;
+    // 按路由器实际命中的路由模式判断，不能看原始 req.url：路由器会先解码 %XX、去掉绝对 URL 的
+    // scheme+host 再匹配，/%61pi/... 或 http://host/api/... 在原始字符串上不以 /api/ 开头却照样命中 /api 路由。
+    // 没命中任何路由（404）时同样要求登录，不向未登录者暴露哪些路径存在
+    const route = req.routeOptions.url;
+    if (route !== undefined && (!route.startsWith('/api/') || PUBLIC_ROUTES.has(route))) return;
     req.user = await auth.verifyAccess(bearer(req));
     // viewer 对所有写操作得到 403
     if (!READ_METHODS.has(req.method) && req.user.role !== 'admin') throw Errors.forbidden();

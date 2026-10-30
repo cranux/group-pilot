@@ -1,7 +1,24 @@
+import http from 'node:http';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Api, connectAll, createGroup, messages, openWs, startStack, waitFor, waitJob, type Stack } from './harness.js';
 
 let s: Stack;
+
+/** 用绝对 URL 作请求目标（`GET http://host/api/... HTTP/1.1`），fetch 发不出这种写法 */
+function absoluteForm(method: string, p: string, token?: string | null): Promise<number> {
+  const u = new URL(s.url);
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      { host: u.hostname, port: u.port, method, path: `${s.url}${p}`, headers: token ? { authorization: `Bearer ${token}` } : {} },
+      (res) => {
+        res.resume();
+        res.on('end', () => resolve(res.statusCode!));
+      },
+    );
+    req.on('error', reject);
+    req.end();
+  });
+}
 
 beforeAll(async () => {
   s = await startStack();
@@ -34,6 +51,31 @@ describe('A0 基础', () => {
     expect(w.status).toBe(403);
     expect(w.body.error.code).toBe('FORBIDDEN');
     expect((await viewer.post('/api/groups', {})).status).toBe(403);
+  });
+
+  it('编码路径、绝对 URL 写法绕不过登录和 viewer 写保护', async () => {
+    const anon = new Api(s.url);
+    const viewer = new Api(s.url);
+    await viewer.login('viewer');
+    const acc01 = async () => (await s.api.get('/api/accounts')).body.find((a: any) => a.id === 'acc-01');
+    const before = await acc01();
+
+    // 路由器先解码 %XX、去掉绝对 URL 的 scheme+host 再匹配，这些写法都会命中真实路由
+    expect((await anon.get('/%61pi/accounts')).status).toBe(401);
+    expect((await anon.post('/%61pi/accounts/acc-01/connect')).status).toBe(401);
+    expect(await absoluteForm('GET', '/api/accounts')).toBe(401);
+    expect(await absoluteForm('POST', '/api/accounts/acc-01/connect')).toBe(401);
+    expect((await viewer.post('/%61pi/accounts/acc-01/connect')).status).toBe(403);
+    expect(await absoluteForm('POST', '/api/accounts/acc-01/connect', viewer.token)).toBe(403);
+    // 不存在的路径同样先要求登录，不向未登录者暴露路由表
+    expect((await anon.get('/%61pi/nope')).status).toBe(401);
+
+    // 带合法 token 时这些写法照常可用，公开接口也照常公开
+    expect((await s.api.get('/%61pi/accounts')).status).toBe(200);
+    expect(await absoluteForm('GET', '/api/accounts', s.api.token)).toBe(200);
+    expect((await anon.get('/%61pi/health')).status).toBe(200);
+
+    expect(await acc01()).toEqual(before);
   });
 
   it('错误密码 401', async () => {
